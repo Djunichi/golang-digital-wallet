@@ -29,27 +29,6 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
-// SetUserID sets the "user_id" field.
-func (uu *UserUpdate) SetUserID(i int) *UserUpdate {
-	uu.mutation.ResetUserID()
-	uu.mutation.SetUserID(i)
-	return uu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableUserID(i *int) *UserUpdate {
-	if i != nil {
-		uu.SetUserID(*i)
-	}
-	return uu
-}
-
-// AddUserID adds i to the "user_id" field.
-func (uu *UserUpdate) AddUserID(i int) *UserUpdate {
-	uu.mutation.AddUserID(i)
-	return uu
-}
-
 // SetEmail sets the "email" field.
 func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
 	uu.mutation.SetEmail(s)
@@ -176,12 +155,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := uu.mutation.UserID(); ok {
-		_spec.SetField(user.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := uu.mutation.AddedUserID(); ok {
-		_spec.AddField(user.FieldUserID, field.TypeInt, value)
-	}
 	if value, ok := uu.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
 	}
@@ -257,27 +230,6 @@ type UserUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (uuo *UserUpdateOne) SetUserID(i int) *UserUpdateOne {
-	uuo.mutation.ResetUserID()
-	uuo.mutation.SetUserID(i)
-	return uuo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableUserID(i *int) *UserUpdateOne {
-	if i != nil {
-		uuo.SetUserID(*i)
-	}
-	return uuo
-}
-
-// AddUserID adds i to the "user_id" field.
-func (uuo *UserUpdateOne) AddUserID(i int) *UserUpdateOne {
-	uuo.mutation.AddUserID(i)
-	return uuo
 }
 
 // SetEmail sets the "email" field.
@@ -435,12 +387,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := uuo.mutation.UserID(); ok {
-		_spec.SetField(user.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := uuo.mutation.AddedUserID(); ok {
-		_spec.AddField(user.FieldUserID, field.TypeInt, value)
 	}
 	if value, ok := uuo.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)

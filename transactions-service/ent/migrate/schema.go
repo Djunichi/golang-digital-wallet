@@ -34,7 +34,6 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "user_id", Type: field.TypeInt, Unique: true},
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "balance", Type: field.TypeFloat64, Default: 0},
