@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nats-io/nats.go"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 	"user-service/ent"
 	"user-service/ent/user"
@@ -24,13 +26,28 @@ type CreateUserRequest struct {
 	Email string `json:"email"`
 }
 
-type CreateUserResponse struct {
+type BaseResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 }
 
-func (userController *UserController) CreateUser(c *gin.Context) {
+type GetBalanceResponse struct {
+	Status  string  `json:"status"`
+	Balance float64 `json:"balance"`
+}
 
+// CreateUser
+// @Summary Create a new user
+// @Description Create a new user with the provided email
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body CreateUserRequest true "User email"
+// @Success 200 {object} BaseResponse
+// @Failure 400 {object} BaseResponse
+// @Failure 500 {object} BaseResponse
+// @Router /createUser [post]
+func (userController *UserController) CreateUser(c *gin.Context) {
 	var request CreateUserRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -41,89 +58,158 @@ func (userController *UserController) CreateUser(c *gin.Context) {
 	}
 
 	result := make(chan gin.H)
-	go func() {
-		u, err := userController.client.User.Create().SetEmail(request.Email).SetCreatedAt(time.Now()).Save(context.Background())
-		if err != nil {
-			result <- gin.H{
-				"status":  "error",
-				"message": err.Error(),
-			}
-			return
-		}
 
-		userData, err := json.Marshal(u)
-		if err != nil {
-			result <- gin.H{
-				"status":  "error",
-				"message": err.Error(),
-			}
-			return
-		}
+	go userController.processCreateUserRequest(request, result)
 
-		msg, err := userController.natsConn.Request("user-created", userData, 10*time.Second)
-		if err != nil {
-			result <- gin.H{
-				"status":  "error",
-				"message": err.Error(),
-			}
-			return
-		}
-
-		var response gin.H
-		err = json.Unmarshal(msg.Data, &response)
-		if err != nil {
-			result <- gin.H{
-				"status":  "error",
-				"message": err.Error(),
-			}
-			return
-		}
-
-		result <- response
-	}()
-
-	c.JSON(http.StatusOK, <-result)
+	response := <-result
+	status, ok := response["status"].(int)
+	if !ok {
+		status = http.StatusOK
+	}
+	c.JSON(status, response)
 }
 
+// GetBalance
+// @Summary Get user balance
+// @Description Get the balance of a user by email
+// @Tags users
+// @Produce json
+// @Param email path string true "User email"
+// @Success 200 {object} GetBalanceResponse
+// @Failure 400 {object} BaseResponse
+// @Failure 404 {object} BaseResponse
+// @Failure 500 {object} BaseResponse
+// @Router /balance/{email} [get]
 func (userController *UserController) GetBalance(c *gin.Context) {
 	email := c.Param("email")
 
+	decodedEmail, err := url.PathUnescape(email)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
+		return
+	}
+
 	result := make(chan gin.H)
-	go func() {
 
-		tx, err := userController.client.Tx(context.Background())
-		if err != nil {
-			result <- gin.H{
-				"status":  "error",
-				"message": err.Error(),
-			}
-			return
+	go userController.processBalanceRequest(decodedEmail, result)
+
+	response := <-result
+	status, ok := response["status"].(int)
+	if !ok {
+		status = http.StatusOK
+	}
+	c.JSON(status, response)
+}
+
+func (userController *UserController) processBalanceRequest(email string, result chan gin.H) {
+	defer close(result)
+
+	tx, err := userController.client.Tx(context.Background())
+	if err != nil {
+		result <- gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": "Transaction error: " + err.Error(),
 		}
+		return
+	}
 
-		usr := tx.User.Query().Where(user.EmailEQ(email))
-		if usr == nil {
-			result <- gin.H{
-				"status":  "error",
-				"message": "From user not found",
-			}
-			return
+	_, err = tx.User.Query().Where(user.EmailEQ(email)).Only(context.Background())
+	if err != nil {
+		result <- gin.H{
+			"status":  http.StatusNotFound,
+			"message": "User not found",
 		}
+		return
+	}
 
-		msg, err := userController.natsConn.Request("get-balance", []byte(email), 10*time.Second)
-		if err != nil {
-			result <- gin.H{"error": err.Error()}
-			return
+	msg, err := userController.natsConn.Request("get-balance", []byte(email), 1000*time.Second)
+	if err != nil {
+		result <- gin.H{
+			"status": http.StatusInternalServerError,
+			"error":  "NATS request error: " + err.Error(),
 		}
+		return
+	}
 
-		var balance int
-		err = json.Unmarshal(msg.Data, &balance)
-		if err != nil {
-			result <- gin.H{"error": err.Error()}
-			return
+	balance := string(msg.Data)
+	bal, err := strconv.ParseFloat(balance, 64)
+	if err != nil {
+		result <- gin.H{
+			"status": http.StatusInternalServerError,
+			"error":  "NATS request error: " + balance,
 		}
+	}
 
-		result <- gin.H{"balance": balance}
-	}()
+	result <- gin.H{
+		"status":  http.StatusOK,
+		"balance": bal,
+	}
+}
 
-	c.JSON(http.StatusOK, <-result)
+func (userController *UserController) processCreateUserRequest(request CreateUserRequest, result chan gin.H) {
+	defer close(result)
+
+	tx, err := userController.client.Tx(context.Background())
+	if err != nil {
+		result <- gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": "Transaction error: " + err.Error(),
+		}
+		return
+	}
+	_, err = tx.User.Query().Where(user.EmailEQ(request.Email)).Only(context.Background())
+	if err == nil {
+		result <- gin.H{
+			"status":  http.StatusBadRequest,
+			"message": "User already exists",
+		}
+		return
+	}
+
+	u, err := tx.User.Create().
+		SetEmail(request.Email).
+		SetCreatedAt(time.Now()).
+		Save(context.Background())
+	if err != nil {
+		tx.Rollback()
+		result <- gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": "Database error: " + err.Error(),
+		}
+		return
+	}
+
+	userData, err := json.Marshal(u)
+	if err != nil {
+		tx.Rollback()
+		result <- gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": "JSON marshal error: " + err.Error(),
+		}
+		return
+	}
+
+	msg, err := userController.natsConn.Request("user-created", userData, 10*time.Second)
+	if err != nil {
+		tx.Rollback()
+		result <- gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": "NATS request error: " + err.Error(),
+		}
+		return
+	}
+
+	var response gin.H
+	err = json.Unmarshal(msg.Data, &response)
+	if err != nil {
+		tx.Rollback()
+		result <- gin.H{
+			"status":  http.StatusInternalServerError,
+			"message": "JSON unmarshal error: " + err.Error(),
+		}
+		return
+	}
+
+	tx.Commit()
+	result <- response
 }

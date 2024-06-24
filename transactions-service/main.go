@@ -18,6 +18,12 @@ import (
 var client *ent.Client
 var natsConn *nats.Conn
 
+// @title Golang Digital Wallet Transaction Service
+// @version 1.0
+// @description This is a sample Transaction Service for a digital wallet.
+
+// @host localhost:8081
+// @BasePath /
 func main() {
 	var err error
 
@@ -57,7 +63,7 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	if err := r.Run(":8081"); err != nil {
+	if err := r.Run(":8083"); err != nil {
 		log.Fatalf("failed to run server: %v", err)
 	}
 }

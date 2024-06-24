@@ -3,8 +3,8 @@ package messaging
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
+	"strconv"
 	"time"
 	"transactions-service/ent"
 	"transactions-service/ent/user"
@@ -20,14 +20,14 @@ func SetupNATS(natsConn *nats.Conn, client *ent.Client) {
 				log.Printf("error unmarshalling user-created message: %v", err)
 				return
 			}
-			userID := int(userData["id"].(float64))
 			email := userData["email"].(string)
+			id := int(userData["id"].(float64))
 			createdAt, err := time.Parse(time.RFC3339, userData["created_at"].(string))
 			if err != nil {
 				log.Printf("error parsing created_at: %v", err)
 				return
 			}
-			_, err = client.User.Create().SetUserID(userID).SetEmail(email).SetCreatedAt(createdAt).SetBalance(0).Save(context.Background())
+			_, err = client.User.Create().SetID(id).SetEmail(email).SetCreatedAt(createdAt).SetBalance(0).Save(context.Background())
 			if err != nil {
 				log.Printf("error creating user: %v", err)
 			}
@@ -50,10 +50,11 @@ func SetupNATS(natsConn *nats.Conn, client *ent.Client) {
 			email := string(m.Data)
 			u, err := client.User.Query().Where(user.EmailEQ(email)).Only(context.Background())
 			if err != nil {
-				natsConn.Publish(m.Reply, []byte("0"))
+				natsConn.Publish(m.Reply, []byte(err.Error()))
 				return
 			}
-			natsConn.Publish(m.Reply, []byte(fmt.Sprintf("%d", u.Balance)))
+			str := strconv.FormatFloat(float64(u.Balance), 'f', -1, 32)
+			natsConn.Publish(m.Reply, []byte(str))
 		}()
 	})
 }

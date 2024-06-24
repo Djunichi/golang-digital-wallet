@@ -14,10 +14,6 @@ import (
 func init() {
 	userFields := schema.User{}.Fields()
 	_ = userFields
-	// userDescUserID is the schema descriptor for user_id field.
-	userDescUserID := userFields[0].Descriptor()
-	// user.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	user.UserIDValidator = userDescUserID.Validators[0].(func(int) error)
 	// userDescCreatedAt is the schema descriptor for created_at field.
 	userDescCreatedAt := userFields[2].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.

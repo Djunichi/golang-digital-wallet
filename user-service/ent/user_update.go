@@ -28,27 +28,6 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
-// SetUserID sets the "user_id" field.
-func (uu *UserUpdate) SetUserID(i int) *UserUpdate {
-	uu.mutation.ResetUserID()
-	uu.mutation.SetUserID(i)
-	return uu
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableUserID(i *int) *UserUpdate {
-	if i != nil {
-		uu.SetUserID(*i)
-	}
-	return uu
-}
-
-// AddUserID adds i to the "user_id" field.
-func (uu *UserUpdate) AddUserID(i int) *UserUpdate {
-	uu.mutation.AddUserID(i)
-	return uu
-}
-
 // SetEmail sets the "email" field.
 func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
 	uu.mutation.SetEmail(s)
@@ -109,20 +88,7 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (uu *UserUpdate) check() error {
-	if v, ok := uu.mutation.UserID(); ok {
-		if err := user.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "User.user_id": %w`, err)}
-		}
-	}
-	return nil
-}
-
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := uu.check(); err != nil {
-		return n, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -130,12 +96,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := uu.mutation.UserID(); ok {
-		_spec.SetField(user.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := uu.mutation.AddedUserID(); ok {
-		_spec.AddField(user.FieldUserID, field.TypeInt, value)
 	}
 	if value, ok := uu.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
@@ -161,27 +121,6 @@ type UserUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
-}
-
-// SetUserID sets the "user_id" field.
-func (uuo *UserUpdateOne) SetUserID(i int) *UserUpdateOne {
-	uuo.mutation.ResetUserID()
-	uuo.mutation.SetUserID(i)
-	return uuo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableUserID(i *int) *UserUpdateOne {
-	if i != nil {
-		uuo.SetUserID(*i)
-	}
-	return uuo
-}
-
-// AddUserID adds i to the "user_id" field.
-func (uuo *UserUpdateOne) AddUserID(i int) *UserUpdateOne {
-	uuo.mutation.AddUserID(i)
-	return uuo
 }
 
 // SetEmail sets the "email" field.
@@ -257,20 +196,7 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (uuo *UserUpdateOne) check() error {
-	if v, ok := uuo.mutation.UserID(); ok {
-		if err := user.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "User.user_id": %w`, err)}
-		}
-	}
-	return nil
-}
-
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
-	if err := uuo.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	id, ok := uuo.mutation.ID()
 	if !ok {
@@ -295,12 +221,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := uuo.mutation.UserID(); ok {
-		_spec.SetField(user.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := uuo.mutation.AddedUserID(); ok {
-		_spec.AddField(user.FieldUserID, field.TypeInt, value)
 	}
 	if value, ok := uuo.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
