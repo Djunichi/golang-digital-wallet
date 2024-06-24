@@ -31,7 +31,6 @@ import (
 // @host localhost:8080
 // @BasePath /api/v1
 func main() {
-	// Инициализация базы данных и NATS
 	client, natsConn, err := initializeResources()
 	if err != nil {
 		log.Fatalf("failed to initialize resources: %v", err)
@@ -39,16 +38,14 @@ func main() {
 	defer client.Close()
 	defer natsConn.Close()
 
-	// Создание Gin router
 	r := setupRouter(client, natsConn)
 
-	// Запуск сервера
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server: %v", err)
 	}
 }
 
-// initializeResources инициализирует подключение к базе данных и NATS
+// initializeResources Initialize DB and NATS connections
 func initializeResources() (*ent.Client, *nats.Conn, error) {
 	natsURL := os.Getenv("NATS_URL")
 	dbURL := os.Getenv("DATABASE_URL")
@@ -74,7 +71,7 @@ func initializeResources() (*ent.Client, *nats.Conn, error) {
 	return client, natsConn, nil
 }
 
-// setupRouter настраивает маршруты для Gin
+// setupRouter Routing
 func setupRouter(client *ent.Client, natsConn *nats.Conn) *gin.Engine {
 	r := gin.Default()
 

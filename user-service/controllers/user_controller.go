@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+	"user-service/common/requests"
 	"user-service/ent"
 	"user-service/ent/user"
 )
@@ -22,33 +23,19 @@ func NewUserController(client *ent.Client, natsConn *nats.Conn) *UserController 
 	return &UserController{client: client, natsConn: natsConn}
 }
 
-type CreateUserRequest struct {
-	Email string `json:"email"`
-}
-
-type BaseResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-}
-
-type GetBalanceResponse struct {
-	Status  string  `json:"status"`
-	Balance float64 `json:"balance"`
-}
-
 // CreateUser
 // @Summary Create a new user
 // @Description Create a new user with the provided email
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param request body CreateUserRequest true "User email"
-// @Success 200 {object} BaseResponse
-// @Failure 400 {object} BaseResponse
-// @Failure 500 {object} BaseResponse
+// @Param request body requests.CreateUserRequest true "User email"
+// @Success 200 {object} responses.BaseResponse
+// @Failure 400 {object} responses.BaseResponse
+// @Failure 500 {object} responses.BaseResponse
 // @Router /createUser [post]
 func (userController *UserController) CreateUser(c *gin.Context) {
-	var request CreateUserRequest
+	var request requests.CreateUserRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
@@ -75,10 +62,10 @@ func (userController *UserController) CreateUser(c *gin.Context) {
 // @Tags users
 // @Produce json
 // @Param email path string true "User email"
-// @Success 200 {object} GetBalanceResponse
-// @Failure 400 {object} BaseResponse
-// @Failure 404 {object} BaseResponse
-// @Failure 500 {object} BaseResponse
+// @Success 200 {object} responses.GetBalanceResponse
+// @Failure 400 {object} responses.BaseResponse
+// @Failure 404 {object} responses.BaseResponse
+// @Failure 500 {object} responses.BaseResponse
 // @Router /balance/{email} [get]
 func (userController *UserController) GetBalance(c *gin.Context) {
 	email := c.Param("email")
@@ -146,7 +133,7 @@ func (userController *UserController) processBalanceRequest(email string, result
 	}
 }
 
-func (userController *UserController) processCreateUserRequest(request CreateUserRequest, result chan gin.H) {
+func (userController *UserController) processCreateUserRequest(request requests.CreateUserRequest, result chan gin.H) {
 	defer close(result)
 
 	tx, err := userController.client.Tx(context.Background())
