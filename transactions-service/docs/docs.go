@@ -115,6 +115,9 @@ const docTemplate = `{
                 "amount": {
                     "type": "number"
                 },
+                "request_id": {
+                    "type": "string"
+                },
                 "user_id": {
                     "type": "integer"
                 }
@@ -128,6 +131,9 @@ const docTemplate = `{
                 },
                 "from_user_id": {
                     "type": "integer"
+                },
+                "request_id": {
+                    "type": "string"
                 },
                 "to_user_id": {
                     "type": "integer"

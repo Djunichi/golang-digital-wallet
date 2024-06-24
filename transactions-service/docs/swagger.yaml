@@ -4,6 +4,8 @@ definitions:
     properties:
       amount:
         type: number
+      request_id:
+        type: string
       user_id:
         type: integer
     type: object
@@ -13,6 +15,8 @@ definitions:
         type: number
       from_user_id:
         type: integer
+      request_id:
+        type: string
       to_user_id:
         type: integer
     type: object
