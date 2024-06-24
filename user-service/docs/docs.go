@@ -47,25 +47,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controllers.GetBalanceResponse"
+                            "$ref": "#/definitions/responses.GetBalanceResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controllers.BaseResponse"
+                            "$ref": "#/definitions/responses.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controllers.BaseResponse"
+                            "$ref": "#/definitions/responses.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/controllers.BaseResponse"
+                            "$ref": "#/definitions/responses.BaseResponse"
                         }
                     }
                 }
@@ -91,7 +91,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.CreateUserRequest"
+                            "$ref": "#/definitions/requests.CreateUserRequest"
                         }
                     }
                 ],
@@ -99,19 +99,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controllers.BaseResponse"
+                            "$ref": "#/definitions/responses.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controllers.BaseResponse"
+                            "$ref": "#/definitions/responses.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/controllers.BaseResponse"
+                            "$ref": "#/definitions/responses.BaseResponse"
                         }
                     }
                 }
@@ -119,7 +119,15 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "controllers.BaseResponse": {
+        "requests.CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.BaseResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -130,15 +138,7 @@ const docTemplate = `{
                 }
             }
         },
-        "controllers.CreateUserRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                }
-            }
-        },
-        "controllers.GetBalanceResponse": {
+        "responses.GetBalanceResponse": {
             "type": "object",
             "properties": {
                 "balance": {

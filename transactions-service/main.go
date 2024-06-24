@@ -15,9 +15,6 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-var client *ent.Client
-var natsConn *nats.Conn
-
 // @title Golang Digital Wallet Transaction Service
 // @version 1.0
 // @description This is a sample Transaction Service for a digital wallet.
@@ -25,32 +22,58 @@ var natsConn *nats.Conn
 // @host localhost:8081
 // @BasePath /
 func main() {
-	var err error
-
-	natsURL := os.Getenv("NATS_URL")
-	dbUrl := os.Getenv("DATABASE_URL")
-	dbProvider := os.Getenv("DB_PROVIDER")
-
-	client, err = ent.Open(dbProvider, dbUrl)
+	client, err := initializeDatabase()
 	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
+		log.Fatalf("failed to initialize database: %v", err)
 	}
-
 	defer client.Close()
 
-	ctx := context.Background()
-	if err := client.Schema.Create(ctx); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
-
-	natsConn, err = nats.Connect(natsURL)
+	natsConn, err := initializeNATS()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("failed to connect to NATS: %v", err)
 	}
 	defer natsConn.Close()
 
 	messaging.SetupNATS(natsConn, client)
 
+	r := setupRouter(client, natsConn)
+
+	if err := r.Run(":8083"); err != nil {
+		log.Fatalf("failed to run server: %v", err)
+	}
+}
+
+// initializeDatabase Initialize DB
+func initializeDatabase() (*ent.Client, error) {
+	dbURL := os.Getenv("DATABASE_URL")
+	dbProvider := os.Getenv("DB_PROVIDER")
+
+	client, err := ent.Open(dbProvider, dbURL)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+	if err := client.Schema.Create(ctx); err != nil {
+		client.Close()
+		return nil, err
+	}
+
+	return client, nil
+}
+
+// initializeNATS Initialize NATS
+func initializeNATS() (*nats.Conn, error) {
+	natsURL := os.Getenv("NATS_URL")
+	natsConn, err := nats.Connect(natsURL)
+	if err != nil {
+		return nil, err
+	}
+	return natsConn, nil
+}
+
+// setupRouter Routing
+func setupRouter(client *ent.Client, natsConn *nats.Conn) *gin.Engine {
 	r := gin.Default()
 
 	transactionsController := controllers.NewTransactionsController(client, natsConn)
@@ -63,7 +86,5 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	if err := r.Run(":8083"); err != nil {
-		log.Fatalf("failed to run server: %v", err)
-	}
+	return r
 }

@@ -1,18 +1,18 @@
 basePath: /api/v1
 definitions:
-  controllers.BaseResponse:
+  requests.CreateUserRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  responses.BaseResponse:
     properties:
       message:
         type: string
       status:
         type: string
     type: object
-  controllers.CreateUserRequest:
-    properties:
-      email:
-        type: string
-    type: object
-  controllers.GetBalanceResponse:
+  responses.GetBalanceResponse:
     properties:
       balance:
         type: number
@@ -48,19 +48,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controllers.GetBalanceResponse'
+            $ref: '#/definitions/responses.GetBalanceResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controllers.BaseResponse'
+            $ref: '#/definitions/responses.BaseResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controllers.BaseResponse'
+            $ref: '#/definitions/responses.BaseResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/controllers.BaseResponse'
+            $ref: '#/definitions/responses.BaseResponse'
       summary: Get user balance
       tags:
       - users
@@ -75,22 +75,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/controllers.CreateUserRequest'
+          $ref: '#/definitions/requests.CreateUserRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controllers.BaseResponse'
+            $ref: '#/definitions/responses.BaseResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controllers.BaseResponse'
+            $ref: '#/definitions/responses.BaseResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/controllers.BaseResponse'
+            $ref: '#/definitions/responses.BaseResponse'
       summary: Create a new user
       tags:
       - users
