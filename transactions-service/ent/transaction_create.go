@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // TransactionCreate is the builder for creating a Transaction entity.
@@ -19,12 +20,6 @@ type TransactionCreate struct {
 	config
 	mutation *TransactionMutation
 	hooks    []Hook
-}
-
-// SetTransactionID sets the "transaction_id" field.
-func (tc *TransactionCreate) SetTransactionID(s string) *TransactionCreate {
-	tc.mutation.SetTransactionID(s)
-	return tc
 }
 
 // SetAmount sets the "amount" field.
@@ -42,6 +37,18 @@ func (tc *TransactionCreate) SetCreatedAt(t time.Time) *TransactionCreate {
 // SetType sets the "type" field.
 func (tc *TransactionCreate) SetType(t transaction.Type) *TransactionCreate {
 	tc.mutation.SetType(t)
+	return tc
+}
+
+// SetRequestID sets the "request_id" field.
+func (tc *TransactionCreate) SetRequestID(u uuid.UUID) *TransactionCreate {
+	tc.mutation.SetRequestID(u)
+	return tc
+}
+
+// SetID sets the "id" field.
+func (tc *TransactionCreate) SetID(i int) *TransactionCreate {
+	tc.mutation.SetID(i)
 	return tc
 }
 
@@ -98,9 +105,6 @@ func (tc *TransactionCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TransactionCreate) check() error {
-	if _, ok := tc.mutation.TransactionID(); !ok {
-		return &ValidationError{Name: "transaction_id", err: errors.New(`ent: missing required field "Transaction.transaction_id"`)}
-	}
 	if _, ok := tc.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "Transaction.amount"`)}
 	}
@@ -114,6 +118,9 @@ func (tc *TransactionCreate) check() error {
 		if err := transaction.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Transaction.type": %w`, err)}
 		}
+	}
+	if _, ok := tc.mutation.RequestID(); !ok {
+		return &ValidationError{Name: "request_id", err: errors.New(`ent: missing required field "Transaction.request_id"`)}
 	}
 	return nil
 }
@@ -129,8 +136,10 @@ func (tc *TransactionCreate) sqlSave(ctx context.Context) (*Transaction, error) 
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int(id)
+	}
 	tc.mutation.id = &_node.ID
 	tc.mutation.done = true
 	return _node, nil
@@ -141,9 +150,9 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		_node = &Transaction{config: tc.config}
 		_spec = sqlgraph.NewCreateSpec(transaction.Table, sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeInt))
 	)
-	if value, ok := tc.mutation.TransactionID(); ok {
-		_spec.SetField(transaction.FieldTransactionID, field.TypeString, value)
-		_node.TransactionID = value
+	if id, ok := tc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
 	}
 	if value, ok := tc.mutation.Amount(); ok {
 		_spec.SetField(transaction.FieldAmount, field.TypeFloat64, value)
@@ -156,6 +165,10 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.GetType(); ok {
 		_spec.SetField(transaction.FieldType, field.TypeEnum, value)
 		_node.Type = value
+	}
+	if value, ok := tc.mutation.RequestID(); ok {
+		_spec.SetField(transaction.FieldRequestID, field.TypeUUID, value)
+		_node.RequestID = value
 	}
 	if nodes := tc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -221,7 +234,7 @@ func (tcb *TransactionCreateBulk) Save(ctx context.Context) ([]*Transaction, err
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}

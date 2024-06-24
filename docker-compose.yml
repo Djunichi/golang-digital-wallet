@@ -20,8 +20,14 @@ services:
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgresql.conf:/etc/postgresql/postgresql.conf
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testUser -d testDb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   user-service:
     build:
@@ -31,8 +37,10 @@ services:
       - DATABASE_URL=postgres://testUser:tEstpAsswOrd!@2@postgres:5432/testDb?sslmode=disable&search_path=user_service
       - DB_PROVIDER=postgres
     depends_on:
-      - nats
-      - postgres
+      nats:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     ports:
       - "8080:8080"
     networks:
@@ -46,8 +54,10 @@ services:
       - DATABASE_URL=postgres://testUser:tEstpAsswOrd!@2@postgres:5432/testDb?sslmode=disable&search_path=transactions_service
       - DB_PROVIDER=postgres
     depends_on:
-      - nats
-      - postgres
+      nats:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     ports:
       - "8081:8081"
     networks:

@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"github.com/nats-io/nats.go"
+	_ "transactions-service/docs"
 )
 
 // @title Golang Digital Wallet Transaction Service
@@ -20,7 +21,7 @@ import (
 // @description This is a sample Transaction Service for a digital wallet.
 
 // @host localhost:8081
-// @BasePath /
+// @BasePath /api/v1
 func main() {
 	client, err := initializeDatabase()
 	if err != nil {
@@ -38,7 +39,7 @@ func main() {
 
 	r := setupRouter(client, natsConn)
 
-	if err := r.Run(":8083"); err != nil {
+	if err := r.Run(":8081"); err != nil {
 		log.Fatalf("failed to run server: %v", err)
 	}
 }

@@ -14,14 +14,14 @@ const (
 	Label = "transaction"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldTransactionID holds the string denoting the transaction_id field in the database.
-	FieldTransactionID = "transaction_id"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
+	// FieldRequestID holds the string denoting the request_id field in the database.
+	FieldRequestID = "request_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the transaction in the database.
@@ -38,10 +38,10 @@ const (
 // Columns holds all SQL columns for transaction fields.
 var Columns = []string{
 	FieldID,
-	FieldTransactionID,
 	FieldAmount,
 	FieldCreatedAt,
 	FieldType,
+	FieldRequestID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "transactions"
@@ -96,11 +96,6 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByTransactionID orders the results by the transaction_id field.
-func ByTransactionID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTransactionID, opts...).ToFunc()
-}
-
 // ByAmount orders the results by the amount field.
 func ByAmount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAmount, opts...).ToFunc()
@@ -114,6 +109,11 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByType orders the results by the type field.
 func ByType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByRequestID orders the results by the request_id field.
+func ByRequestID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRequestID, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

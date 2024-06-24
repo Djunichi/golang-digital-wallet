@@ -11,10 +11,10 @@ var (
 	// TransactionsColumns holds the columns for the "transactions" table.
 	TransactionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "transaction_id", Type: field.TypeString, Unique: true},
 		{Name: "amount", Type: field.TypeFloat64},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"credit", "debit"}},
+		{Name: "request_id", Type: field.TypeUUID},
 		{Name: "user_transactions", Type: field.TypeInt, Nullable: true},
 	}
 	// TransactionsTable holds the schema information for the "transactions" table.

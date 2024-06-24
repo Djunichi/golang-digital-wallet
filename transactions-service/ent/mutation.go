@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 const (
@@ -32,20 +33,20 @@ const (
 // TransactionMutation represents an operation that mutates the Transaction nodes in the graph.
 type TransactionMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	transaction_id *string
-	amount         *float64
-	addamount      *float64
-	created_at     *time.Time
-	_type          *transaction.Type
-	clearedFields  map[string]struct{}
-	user           *int
-	cleareduser    bool
-	done           bool
-	oldValue       func(context.Context) (*Transaction, error)
-	predicates     []predicate.Transaction
+	op            Op
+	typ           string
+	id            *int
+	amount        *float64
+	addamount     *float64
+	created_at    *time.Time
+	_type         *transaction.Type
+	request_id    *uuid.UUID
+	clearedFields map[string]struct{}
+	user          *int
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*Transaction, error)
+	predicates    []predicate.Transaction
 }
 
 var _ ent.Mutation = (*TransactionMutation)(nil)
@@ -118,6 +119,12 @@ func (m TransactionMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Transaction entities.
+func (m *TransactionMutation) SetID(id int) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
 func (m *TransactionMutation) ID() (id int, exists bool) {
@@ -144,42 +151,6 @@ func (m *TransactionMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetTransactionID sets the "transaction_id" field.
-func (m *TransactionMutation) SetTransactionID(s string) {
-	m.transaction_id = &s
-}
-
-// TransactionID returns the value of the "transaction_id" field in the mutation.
-func (m *TransactionMutation) TransactionID() (r string, exists bool) {
-	v := m.transaction_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTransactionID returns the old "transaction_id" field's value of the Transaction entity.
-// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMutation) OldTransactionID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTransactionID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTransactionID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTransactionID: %w", err)
-	}
-	return oldValue.TransactionID, nil
-}
-
-// ResetTransactionID resets all changes to the "transaction_id" field.
-func (m *TransactionMutation) ResetTransactionID() {
-	m.transaction_id = nil
 }
 
 // SetAmount sets the "amount" field.
@@ -310,6 +281,42 @@ func (m *TransactionMutation) ResetType() {
 	m._type = nil
 }
 
+// SetRequestID sets the "request_id" field.
+func (m *TransactionMutation) SetRequestID(u uuid.UUID) {
+	m.request_id = &u
+}
+
+// RequestID returns the value of the "request_id" field in the mutation.
+func (m *TransactionMutation) RequestID() (r uuid.UUID, exists bool) {
+	v := m.request_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestID returns the old "request_id" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldRequestID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestID: %w", err)
+	}
+	return oldValue.RequestID, nil
+}
+
+// ResetRequestID resets all changes to the "request_id" field.
+func (m *TransactionMutation) ResetRequestID() {
+	m.request_id = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *TransactionMutation) SetUserID(id int) {
 	m.user = &id
@@ -384,9 +391,6 @@ func (m *TransactionMutation) Type() string {
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
 	fields := make([]string, 0, 4)
-	if m.transaction_id != nil {
-		fields = append(fields, transaction.FieldTransactionID)
-	}
 	if m.amount != nil {
 		fields = append(fields, transaction.FieldAmount)
 	}
@@ -396,6 +400,9 @@ func (m *TransactionMutation) Fields() []string {
 	if m._type != nil {
 		fields = append(fields, transaction.FieldType)
 	}
+	if m.request_id != nil {
+		fields = append(fields, transaction.FieldRequestID)
+	}
 	return fields
 }
 
@@ -404,14 +411,14 @@ func (m *TransactionMutation) Fields() []string {
 // schema.
 func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case transaction.FieldTransactionID:
-		return m.TransactionID()
 	case transaction.FieldAmount:
 		return m.Amount()
 	case transaction.FieldCreatedAt:
 		return m.CreatedAt()
 	case transaction.FieldType:
 		return m.GetType()
+	case transaction.FieldRequestID:
+		return m.RequestID()
 	}
 	return nil, false
 }
@@ -421,14 +428,14 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case transaction.FieldTransactionID:
-		return m.OldTransactionID(ctx)
 	case transaction.FieldAmount:
 		return m.OldAmount(ctx)
 	case transaction.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case transaction.FieldType:
 		return m.OldType(ctx)
+	case transaction.FieldRequestID:
+		return m.OldRequestID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Transaction field %s", name)
 }
@@ -438,13 +445,6 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 // type.
 func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case transaction.FieldTransactionID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTransactionID(v)
-		return nil
 	case transaction.FieldAmount:
 		v, ok := value.(float64)
 		if !ok {
@@ -465,6 +465,13 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetType(v)
+		return nil
+	case transaction.FieldRequestID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Transaction field %s", name)
@@ -530,9 +537,6 @@ func (m *TransactionMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TransactionMutation) ResetField(name string) error {
 	switch name {
-	case transaction.FieldTransactionID:
-		m.ResetTransactionID()
-		return nil
 	case transaction.FieldAmount:
 		m.ResetAmount()
 		return nil
@@ -541,6 +545,9 @@ func (m *TransactionMutation) ResetField(name string) error {
 		return nil
 	case transaction.FieldType:
 		m.ResetType()
+		return nil
+	case transaction.FieldRequestID:
+		m.ResetRequestID()
 		return nil
 	}
 	return fmt.Errorf("unknown Transaction field %s", name)

@@ -298,12 +298,12 @@ func (tq *TransactionQuery) WithUser(opts ...func(*UserQuery)) *TransactionQuery
 // Example:
 //
 //	var v []struct {
-//		TransactionID string `json:"transaction_id,omitempty"`
+//		Amount float64 `json:"amount,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Transaction.Query().
-//		GroupBy(transaction.FieldTransactionID).
+//		GroupBy(transaction.FieldAmount).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tq *TransactionQuery) GroupBy(field string, fields ...string) *TransactionGroupBy {
@@ -321,11 +321,11 @@ func (tq *TransactionQuery) GroupBy(field string, fields ...string) *Transaction
 // Example:
 //
 //	var v []struct {
-//		TransactionID string `json:"transaction_id,omitempty"`
+//		Amount float64 `json:"amount,omitempty"`
 //	}
 //
 //	client.Transaction.Query().
-//		Select(transaction.FieldTransactionID).
+//		Select(transaction.FieldAmount).
 //		Scan(ctx, &v)
 func (tq *TransactionQuery) Select(fields ...string) *TransactionSelect {
 	tq.ctx.Fields = append(tq.ctx.Fields, fields...)
