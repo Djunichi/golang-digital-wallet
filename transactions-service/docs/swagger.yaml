@@ -1,8 +1,26 @@
 basePath: /api/v1
 definitions:
-  requests.CreateUserRequest:
+  requests.AddMoneyRequest:
     properties:
-      email:
+      amount:
+        type: number
+      user_id:
+        type: integer
+    type: object
+  requests.TransferMoneyRequest:
+    properties:
+      amount_to_transfer:
+        type: number
+      from_user_id:
+        type: integer
+      to_user_id:
+        type: integer
+    type: object
+  responses.AddMoneyResponse:
+    properties:
+      balance:
+        type: number
+      status:
         type: string
     type: object
   responses.BaseResponse:
@@ -12,63 +30,56 @@ definitions:
       status:
         type: string
     type: object
-  responses.GetBalanceResponse:
-    properties:
-      balance:
-        type: number
-      status:
-        type: string
-    type: object
-host: localhost:8080
+host: localhost:8081
 info:
   contact: {}
-  description: This is a sample server for a user service.
-  title: User Service API
+  description: This is a sample Transaction Service for a digital wallet.
+  title: Golang Digital Wallet Transaction Service
   version: "1.0"
 paths:
-  /balance/{email}:
-    get:
-      description: Get the balance of a user by email
-      parameters:
-      - description: User email
-        in: path
-        name: email
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/responses.GetBalanceResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/responses.BaseResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/responses.BaseResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/responses.BaseResponse'
-      summary: Get user balance
-      tags:
-      - users
-  /createUser:
+  /addMoney:
     post:
       consumes:
       - application/json
-      description: Create a new user with the provided email
+      description: Add a specified amount of money to a user's account balance
       parameters:
-      - description: User email
+      - description: Add Money Request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/requests.CreateUserRequest'
+          $ref: '#/definitions/requests.AddMoneyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.AddMoneyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.BaseResponse'
+      summary: Add money to a user's account
+      tags:
+      - transactions
+  /transferMoney:
+    post:
+      consumes:
+      - application/json
+      description: Transfer a specified amount of money from one user's account to
+        another
+      parameters:
+      - description: Transfer Money Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/requests.TransferMoneyRequest'
       produces:
       - application/json
       responses:
@@ -84,7 +95,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/responses.BaseResponse'
-      summary: Create a new user
+      summary: Transfer money between two users
       tags:
-      - users
+      - transactions
 swagger: "2.0"

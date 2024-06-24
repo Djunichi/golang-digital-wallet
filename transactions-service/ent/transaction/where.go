@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
@@ -55,11 +56,6 @@ func IDLTE(id int) predicate.Transaction {
 	return predicate.Transaction(sql.FieldLTE(FieldID, id))
 }
 
-// TransactionID applies equality check predicate on the "transaction_id" field. It's identical to TransactionIDEQ.
-func TransactionID(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldEQ(FieldTransactionID, v))
-}
-
 // Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
 func Amount(v float64) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldAmount, v))
@@ -70,69 +66,9 @@ func CreatedAt(v time.Time) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldCreatedAt, v))
 }
 
-// TransactionIDEQ applies the EQ predicate on the "transaction_id" field.
-func TransactionIDEQ(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldEQ(FieldTransactionID, v))
-}
-
-// TransactionIDNEQ applies the NEQ predicate on the "transaction_id" field.
-func TransactionIDNEQ(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldNEQ(FieldTransactionID, v))
-}
-
-// TransactionIDIn applies the In predicate on the "transaction_id" field.
-func TransactionIDIn(vs ...string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldIn(FieldTransactionID, vs...))
-}
-
-// TransactionIDNotIn applies the NotIn predicate on the "transaction_id" field.
-func TransactionIDNotIn(vs ...string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldNotIn(FieldTransactionID, vs...))
-}
-
-// TransactionIDGT applies the GT predicate on the "transaction_id" field.
-func TransactionIDGT(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldGT(FieldTransactionID, v))
-}
-
-// TransactionIDGTE applies the GTE predicate on the "transaction_id" field.
-func TransactionIDGTE(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldGTE(FieldTransactionID, v))
-}
-
-// TransactionIDLT applies the LT predicate on the "transaction_id" field.
-func TransactionIDLT(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldLT(FieldTransactionID, v))
-}
-
-// TransactionIDLTE applies the LTE predicate on the "transaction_id" field.
-func TransactionIDLTE(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldLTE(FieldTransactionID, v))
-}
-
-// TransactionIDContains applies the Contains predicate on the "transaction_id" field.
-func TransactionIDContains(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldContains(FieldTransactionID, v))
-}
-
-// TransactionIDHasPrefix applies the HasPrefix predicate on the "transaction_id" field.
-func TransactionIDHasPrefix(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldHasPrefix(FieldTransactionID, v))
-}
-
-// TransactionIDHasSuffix applies the HasSuffix predicate on the "transaction_id" field.
-func TransactionIDHasSuffix(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldHasSuffix(FieldTransactionID, v))
-}
-
-// TransactionIDEqualFold applies the EqualFold predicate on the "transaction_id" field.
-func TransactionIDEqualFold(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldEqualFold(FieldTransactionID, v))
-}
-
-// TransactionIDContainsFold applies the ContainsFold predicate on the "transaction_id" field.
-func TransactionIDContainsFold(v string) predicate.Transaction {
-	return predicate.Transaction(sql.FieldContainsFold(FieldTransactionID, v))
+// RequestID applies equality check predicate on the "request_id" field. It's identical to RequestIDEQ.
+func RequestID(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldEQ(FieldRequestID, v))
 }
 
 // AmountEQ applies the EQ predicate on the "amount" field.
@@ -233,6 +169,46 @@ func TypeIn(vs ...Type) predicate.Transaction {
 // TypeNotIn applies the NotIn predicate on the "type" field.
 func TypeNotIn(vs ...Type) predicate.Transaction {
 	return predicate.Transaction(sql.FieldNotIn(FieldType, vs...))
+}
+
+// RequestIDEQ applies the EQ predicate on the "request_id" field.
+func RequestIDEQ(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldEQ(FieldRequestID, v))
+}
+
+// RequestIDNEQ applies the NEQ predicate on the "request_id" field.
+func RequestIDNEQ(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldNEQ(FieldRequestID, v))
+}
+
+// RequestIDIn applies the In predicate on the "request_id" field.
+func RequestIDIn(vs ...uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldIn(FieldRequestID, vs...))
+}
+
+// RequestIDNotIn applies the NotIn predicate on the "request_id" field.
+func RequestIDNotIn(vs ...uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldNotIn(FieldRequestID, vs...))
+}
+
+// RequestIDGT applies the GT predicate on the "request_id" field.
+func RequestIDGT(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldGT(FieldRequestID, v))
+}
+
+// RequestIDGTE applies the GTE predicate on the "request_id" field.
+func RequestIDGTE(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldGTE(FieldRequestID, v))
+}
+
+// RequestIDLT applies the LT predicate on the "request_id" field.
+func RequestIDLT(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldLT(FieldRequestID, v))
+}
+
+// RequestIDLTE applies the LTE predicate on the "request_id" field.
+func RequestIDLTE(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldLTE(FieldRequestID, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

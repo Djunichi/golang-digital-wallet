@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // Transaction is the model entity for the Transaction schema.
@@ -18,14 +19,14 @@ type Transaction struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// TransactionID holds the value of the "transaction_id" field.
-	TransactionID string `json:"transaction_id,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount float64 `json:"amount,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type transaction.Type `json:"type,omitempty"`
+	// RequestID holds the value of the "request_id" field.
+	RequestID uuid.UUID `json:"request_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TransactionQuery when eager-loading is set.
 	Edges             TransactionEdges `json:"edges"`
@@ -62,10 +63,12 @@ func (*Transaction) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case transaction.FieldID:
 			values[i] = new(sql.NullInt64)
-		case transaction.FieldTransactionID, transaction.FieldType:
+		case transaction.FieldType:
 			values[i] = new(sql.NullString)
 		case transaction.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
+		case transaction.FieldRequestID:
+			values[i] = new(uuid.UUID)
 		case transaction.ForeignKeys[0]: // user_transactions
 			values[i] = new(sql.NullInt64)
 		default:
@@ -89,12 +92,6 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			t.ID = int(value.Int64)
-		case transaction.FieldTransactionID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field transaction_id", values[i])
-			} else if value.Valid {
-				t.TransactionID = value.String
-			}
 		case transaction.FieldAmount:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field amount", values[i])
@@ -112,6 +109,12 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
 				t.Type = transaction.Type(value.String)
+			}
+		case transaction.FieldRequestID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field request_id", values[i])
+			} else if value != nil {
+				t.RequestID = *value
 			}
 		case transaction.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -161,9 +164,6 @@ func (t *Transaction) String() string {
 	var builder strings.Builder
 	builder.WriteString("Transaction(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
-	builder.WriteString("transaction_id=")
-	builder.WriteString(t.TransactionID)
-	builder.WriteString(", ")
 	builder.WriteString("amount=")
 	builder.WriteString(fmt.Sprintf("%v", t.Amount))
 	builder.WriteString(", ")
@@ -172,6 +172,9 @@ func (t *Transaction) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", t.Type))
+	builder.WriteString(", ")
+	builder.WriteString("request_id=")
+	builder.WriteString(fmt.Sprintf("%v", t.RequestID))
 	builder.WriteByte(')')
 	return builder.String()
 }

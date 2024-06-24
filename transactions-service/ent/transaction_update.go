@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // TransactionUpdate is the builder for updating Transaction entities.
@@ -26,20 +27,6 @@ type TransactionUpdate struct {
 // Where appends a list predicates to the TransactionUpdate builder.
 func (tu *TransactionUpdate) Where(ps ...predicate.Transaction) *TransactionUpdate {
 	tu.mutation.Where(ps...)
-	return tu
-}
-
-// SetTransactionID sets the "transaction_id" field.
-func (tu *TransactionUpdate) SetTransactionID(s string) *TransactionUpdate {
-	tu.mutation.SetTransactionID(s)
-	return tu
-}
-
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableTransactionID(s *string) *TransactionUpdate {
-	if s != nil {
-		tu.SetTransactionID(*s)
-	}
 	return tu
 }
 
@@ -88,6 +75,20 @@ func (tu *TransactionUpdate) SetType(t transaction.Type) *TransactionUpdate {
 func (tu *TransactionUpdate) SetNillableType(t *transaction.Type) *TransactionUpdate {
 	if t != nil {
 		tu.SetType(*t)
+	}
+	return tu
+}
+
+// SetRequestID sets the "request_id" field.
+func (tu *TransactionUpdate) SetRequestID(u uuid.UUID) *TransactionUpdate {
+	tu.mutation.SetRequestID(u)
+	return tu
+}
+
+// SetNillableRequestID sets the "request_id" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableRequestID(u *uuid.UUID) *TransactionUpdate {
+	if u != nil {
+		tu.SetRequestID(*u)
 	}
 	return tu
 }
@@ -171,9 +172,6 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tu.mutation.TransactionID(); ok {
-		_spec.SetField(transaction.FieldTransactionID, field.TypeString, value)
-	}
 	if value, ok := tu.mutation.Amount(); ok {
 		_spec.SetField(transaction.FieldAmount, field.TypeFloat64, value)
 	}
@@ -185,6 +183,9 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.GetType(); ok {
 		_spec.SetField(transaction.FieldType, field.TypeEnum, value)
+	}
+	if value, ok := tu.mutation.RequestID(); ok {
+		_spec.SetField(transaction.FieldRequestID, field.TypeUUID, value)
 	}
 	if tu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -235,20 +236,6 @@ type TransactionUpdateOne struct {
 	mutation *TransactionMutation
 }
 
-// SetTransactionID sets the "transaction_id" field.
-func (tuo *TransactionUpdateOne) SetTransactionID(s string) *TransactionUpdateOne {
-	tuo.mutation.SetTransactionID(s)
-	return tuo
-}
-
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableTransactionID(s *string) *TransactionUpdateOne {
-	if s != nil {
-		tuo.SetTransactionID(*s)
-	}
-	return tuo
-}
-
 // SetAmount sets the "amount" field.
 func (tuo *TransactionUpdateOne) SetAmount(f float64) *TransactionUpdateOne {
 	tuo.mutation.ResetAmount()
@@ -294,6 +281,20 @@ func (tuo *TransactionUpdateOne) SetType(t transaction.Type) *TransactionUpdateO
 func (tuo *TransactionUpdateOne) SetNillableType(t *transaction.Type) *TransactionUpdateOne {
 	if t != nil {
 		tuo.SetType(*t)
+	}
+	return tuo
+}
+
+// SetRequestID sets the "request_id" field.
+func (tuo *TransactionUpdateOne) SetRequestID(u uuid.UUID) *TransactionUpdateOne {
+	tuo.mutation.SetRequestID(u)
+	return tuo
+}
+
+// SetNillableRequestID sets the "request_id" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableRequestID(u *uuid.UUID) *TransactionUpdateOne {
+	if u != nil {
+		tuo.SetRequestID(*u)
 	}
 	return tuo
 }
@@ -407,9 +408,6 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			}
 		}
 	}
-	if value, ok := tuo.mutation.TransactionID(); ok {
-		_spec.SetField(transaction.FieldTransactionID, field.TypeString, value)
-	}
 	if value, ok := tuo.mutation.Amount(); ok {
 		_spec.SetField(transaction.FieldAmount, field.TypeFloat64, value)
 	}
@@ -421,6 +419,9 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	}
 	if value, ok := tuo.mutation.GetType(); ok {
 		_spec.SetField(transaction.FieldType, field.TypeEnum, value)
+	}
+	if value, ok := tuo.mutation.RequestID(); ok {
+		_spec.SetField(transaction.FieldRequestID, field.TypeUUID, value)
 	}
 	if tuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

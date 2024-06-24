@@ -15,40 +15,39 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/balance/{email}": {
-            "get": {
-                "description": "Get the balance of a user by email",
+        "/addMoney": {
+            "post": {
+                "description": "Add a specified amount of money to a user's account balance",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "transactions"
                 ],
-                "summary": "Get user balance",
+                "summary": "Add money to a user's account",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "User email",
-                        "name": "email",
-                        "in": "path",
-                        "required": true
+                        "description": "Add Money Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.AddMoneyRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/responses.GetBalanceResponse"
+                            "$ref": "#/definitions/responses.AddMoneyResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/responses.BaseResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/responses.BaseResponse"
                         }
@@ -62,9 +61,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/createUser": {
+        "/transferMoney": {
             "post": {
-                "description": "Create a new user with the provided email",
+                "description": "Transfer a specified amount of money from one user's account to another",
                 "consumes": [
                     "application/json"
                 ],
@@ -72,17 +71,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "transactions"
                 ],
-                "summary": "Create a new user",
+                "summary": "Transfer money between two users",
                 "parameters": [
                     {
-                        "description": "User email",
+                        "description": "Transfer Money Request",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.CreateUserRequest"
+                            "$ref": "#/definitions/requests.TransferMoneyRequest"
                         }
                     }
                 ],
@@ -110,10 +109,38 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "requests.CreateUserRequest": {
+        "requests.AddMoneyRequest": {
             "type": "object",
             "properties": {
-                "email": {
+                "amount": {
+                    "type": "number"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.TransferMoneyRequest": {
+            "type": "object",
+            "properties": {
+                "amount_to_transfer": {
+                    "type": "number"
+                },
+                "from_user_id": {
+                    "type": "integer"
+                },
+                "to_user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "responses.AddMoneyResponse": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
+                },
+                "status": {
                     "type": "string"
                 }
             }
@@ -128,17 +155,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "responses.GetBalanceResponse": {
-            "type": "object",
-            "properties": {
-                "balance": {
-                    "type": "number"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
         }
     }
 }`
@@ -146,11 +162,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8081",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "User Service API",
-	Description:      "This is a sample server for a user service.",
+	Title:            "Golang Digital Wallet Transaction Service",
+	Description:      "This is a sample Transaction Service for a digital wallet.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
